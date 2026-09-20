@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saadoune AI — Learn Beyond</title>
+<style>
+  :root {
+    --neon: #00f0ff;
+    --neon2: #a855f7;
+    --neon3: #ff2d95;
+    --bg: #050510;
+    --card: rgba(255,255,255,0.04);
+    --border: rgba(0,240,255,0.25);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    color: #e8e8f0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+  /* Fondo animado con grid futurista */
+  .grid-bg {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    background-image:
+      linear-gradient(rgba(0,240,255,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,240,255,0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: gridMove 20s linear infinite;
+    z-index: -2;
+  }
+  .glow-orb {
+    position: fixed; border-radius:50%; filter: blur(120px); opacity:0.25;
+    z-index: -1; animation: float 8s ease-in-out infinite;
+  }
+  .orb1 { width:400px; height:400px; background:var(--neon); top:-100px; left:-100px; }
+  .orb2 { width:350px; height:350px; background:var(--neon2); bottom:-50px; right:-50px; animation-delay:2s; }
+  .orb3 { width:250px; height:250px; background:var(--neon3); top:40%; left:60%; animation-delay:4s; }
+  @keyframes gridMove { 0%{transform:translate(0,0)} 100%{transform:translate(50px,50px)} }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-30px)} }
+
+  /* Navbar */
+  nav {
+    position: fixed; top:0; width:100%; z-index:100;
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 1rem 3rem;
+    background: rgba(5,5,16,0.7); backdrop-filter: blur(15px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-size:1.5rem; font-weight:800; letter-spacing:1px;
+    background: linear-gradient(90deg, var(--neon), var(--neon2), var(--neon3));
+    -webkit-background-clip: text; background-clip:text; color:transparent;
+  }
+  nav ul { display:flex; gap:2rem; list-style:none; }
+  nav a { color:#c0c0d0; text-decoration:none; transition:0.3s; }
+  nav a:hover { color:var(--neon); text-shadow: 0 0 10px var(--neon); }
+
+  /* Hero */
+  .hero {
+    min-height:100vh; display:flex; flex-direction:column;
+    justify-content:center; align-items:center; text-align:center; padding:2rem;
+  }
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 5rem); font-weight:900; line-height:1.1;
+    background: linear-gradient(90deg, var(--neon), var(--neon2), var(--neon3), var(--neon));
+    background-size:300% auto; -webkit-background-clip:text; background-clip:text;
+    color:transparent; animation: shine 6s linear infinite;
+  }
+  @keyframes shine { to { background-position:300% center } }
+  .hero p { font-size:1.3rem; color:#a0a0b8; margin:1.5rem 0 2.5rem; max-width:600px; }
+  .btn {
+    padding: 1rem 2.5rem; border:none; border-radius:50px; cursor:pointer;
+    font-size:1.1rem; font-weight:700; text-decoration:none; display:inline-block;
+    background: linear-gradient(90deg, var(--neon), var(--neon2));
+    color:#000; transition:0.3s;
+    box-shadow: 0 0 20px rgba(0,240,255,0.4);
+  }
+  .btn:hover { transform:scale(1.05); box-shadow: 0 0 40px rgba(0,240,255,0.7); }
+  .btn.ghost {
+    background:transparent; color:var(--neon);
+    border:2px solid var(--neon); box-shadow:none; margin-left:1rem;
+  }
+  .typing { color:var(--neon); border-right:3px solid var(--neon); animation: blink 1s infinite; }
+  @keyframes blink { 50% { border-color:transparent } }
+
+  /* Secciones */
+  section { padding: 6rem 3rem; max-width:1200px; margin:0 auto; }
+  h2 {
+    font-size:2.5rem; text-align:center; margin-bottom:3rem;
+    background: linear-gradient(90deg, var(--neon), var(--neon2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+
+  /* Cursos */
+  .courses-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.5rem;
+  }
+  .card {
+    background: var(--card); border:1px solid var(--border); border-radius:20px;
+    padding:1.8rem; transition:0.4s; position:relative; overflow:hidden;
+    backdrop-filter: blur(10px);
+  }
+  .card::before {
+    content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(0,240,255,0.08),transparent);
+    transition:0.6s;
+  }
+  .card:hover { transform:translateY(-8px); border-color:var(--neon); box-shadow:0 10px 40px rgba(0,240,255,0.15); }
+  .card:hover::before { left:100%; }
+  .card .icon { font-size:2.5rem; margin-bottom:1rem; }
+  .card h3 { color:var(--neon); margin-bottom:0.5rem; font-size:1.2rem; }
+  .card p { color:#9090a8; font-size:0.95rem; line-height:1.5; }
+  .card .level { display:inline-block; margin-top:1rem; padding:0.25rem 0.8rem; border-radius:20px; font-size:0.75rem; font-weight:700; }
+  .level.basico { background:rgba(0,255,150,0.15); color:#00ff96; }
+  .level.intermedio { background:rgba(0,240,255,0.15); color:var(--neon); }
+  .level.avanzado { background:rgba(255,45,149,0.15); color:var(--neon3); }
+
+  /* Stats */
+  .stats { display:flex; justify-content:space-around; flex-wrap:wrap; gap:2rem; }
+  .stat { text-align:center; }
+  .stat .num { font-size:3rem; font-weight:900; color:var(--neon); text-shadow:0 0 20px var(--neon); }
+  .stat .label { color:#808098; }
+
+  footer {
+    text-align:center; padding:3rem; border-top:1px solid var(--border);
+    color:#606078; margin-top:3rem;
+  }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="glow-orb orb1"></div>
+<div class="glow-orb orb2"></div>
+<div class="glow-orb orb3"></div>
+
+<nav>
+  <div class="logo">SAADOUNE AI</div>
+  <ul>
+    <li><a href="#cursos">Cursos</a></li>
+    <li><a href="#rutas">Rutas</a></li>
+    <li><a href="#contacto">Contacto</a></li>
+  </ul>
+</nav>
+
+<header class="hero">
+  <h1>APRENDE MÁS ALLÁ<br>DE LOS LÍMITES</h1>
+  <p>Domina la Inteligencia Artificial del futuro. Cursos en español, prácticos y desde cero. <span class="typing">&nbsp;</span></p>
+  <a href="#cursos" class="btn">🚀 Explorar Cursos</a>
+  <a href="#rutas" class="btn ghost">Ver Rutas de Aprendizaje</a>
+</header>
+
+<section id="stats">
+  <div class="stats">
+    <div class="stat"><div class="num">15+</div><div class="label">Cursos de IA</div></div>
+    <div class="stat"><div class="num">100%</div><div class="label">En Español</div></div>
+    <div class="stat"><div class="num">∞</div><div class="label">Posibilidades</div></div>
+  </div>
+</section>
+
+<section id="cursos">
+  <h2>⚡ Cursos de Inteligencia Artificial</h2>
+  <div class="courses-grid">
+    <div class="card"><div class="icon">🧠</div><h3>Fundamentos de IA</h3><p>Historia, conceptos y aplicaciones de la inteligencia artificial moderna.</p><span class="level basico">Básico</span></div>
+    <div class="card"><div class="icon">💬</div><h3>Prompt Engineering</h3><p>Domina el arte de comunicarte con ChatGPT, Claude y otros LLMs.</p><span class="level basico">Básico</span></div>
+    <div class="card"><div class="icon">🎨</div><h3>IA Generativa</h3><p>Genera imágenes, música y video con Midjourney, DALL-E y Stable Diffusion.</p><span class="level intermedio">Intermedio</span></div>
+    <div class="card"><div class="icon">🐍</div><h3>Python para IA</h3><p>Programación esencial: NumPy, Pandas y Matplotlib desde cero.</p><span class="level basico">Básico</span></div>
+    <div class="card"><div class="icon">📊</div><h3>Machine Learning</h3><p>Algoritmos de regresión, clasificación y clustering con scikit-learn.</p><span class="level intermedio">Intermedio</span></div>
+    <div class="card"><div class="icon">🧬</div><h3>Deep Learning</h3><p>Redes neuronales profundas con TensorFlow y PyTorch.</p><span class="level avanzado">Avanzado</span></div>
+    <div class="card"><div class="icon">👁️</div><h3>Visión por Computadora</h3><p>Reconocimiento de imágenes, detección de objetos y CNNs.</p><span class="level avanzado">Avanzado</span></div>
+    <div class="card"><div class="icon">🗣️</div><h3>Procesamiento de Lenguaje Natural</h3><p>Transformers, BERT y GPT: cómo las máquinas entienden el lenguaje.</p><span class="level avanzado">Avanzado</span></div>
+    <div class="card"><div class="icon">🤖</div><h3>Agentes de IA</h3><p>Construye agentes autónomos con LangChain y herramientas de IA.</p><span class="level intermedio">Intermedio</span></div>
+    <div class="card"><div class="icon">🔍</div><h3>RAG y Bases de Conocimiento</h3><p>Sistemas de IA que consultan tus propios documentos y datos.</p><span class="level intermedio">Intermedio</span></div>
+    <div class="card"><div class="icon">⚖️</div><h3>Ética en la IA</h3><p>Sesgos, privacidad y uso responsable de la inteligencia artificial.</p><span class="level basico">Básico</span></div>
+    <div class="card"><div class="icon">💼</div><h3>IA para Negocios</h3><p>Automatiza tu empresa: marketing, ventas y productividad con IA.</p><span class="level basico">Básico</span></div>
+    <div class="card"><div class="icon">💻</div><h3>Copilots y Asistentes</h3><p>Integra asistentes de IA en tus apps con APIs de OpenAI y Anthropic.</p><span class="level intermedio">Intermedio</span></div>
+    <div class="card"><div class="icon">🎬</div><h3>Video con IA</h3><p>Creación de video con Runway, Sora y herramientas de generación.</p><span class="level intermedio">Intermedio</span></div>
+    <div class="card"><div class="icon">🚀</div><h3>MLOps</h3><p>Despliega modelos de IA en producción con las mejores prácticas.</p><span class="level avanzado">Avanzado</span></div>
+  </div>
+</section>
+
+<section id="rutas">
+  <h2>🛸 Rutas de Aprendizaje</h2>
+  <div class="courses-grid">
+    <div class="card"><div class="icon">🌱</div><h3>Ruta Principiante</h3><p>Fundamentos de IA → Prompt Engineering → Python para IA → IA para Negocios</p><span class="level basico">4 cursos</span></div>
+    <div class="card"><div class="icon">⚡</div><h3>Ruta Creador</h3><p>IA Generativa → Video con IA → Copilots → Agentes de IA</p><span class="level intermedio">4 cursos</span></div>
+    <div class="card"><div class="icon">🧠</div><h3>Ruta Experto</h3><p>Machine Learning → Deep Learning → NLP → Visión por Computadora → MLOps</p><span class="level avanzado">5 cursos</span></div>
+  </div>
+</section>
+
+<footer id="contacto">
+  <p><strong style="color:var(--neon)">Saadoune AI</strong> — Learn Beyond © 2026</p>
+  <p style="margin-top:0.5rem">El futuro se aprende hoy. 🚀</p>
+</footer>
+</body>
+</html>

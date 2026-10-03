@@ -1,197 +1,940 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Saadoune AI — Learn Beyond</title>
+<title>Saadoune AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --neon: #00f0ff;
-    --neon2: #a855f7;
-    --neon3: #ff2d95;
-    --bg: #050510;
-    --card: rgba(255,255,255,0.04);
-    --border: rgba(0,240,255,0.25);
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    background: var(--bg);
-    color: #e8e8f0;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    overflow-x: hidden;
-  }
-  /* Fondo animado con grid futurista */
-  .grid-bg {
-    position: fixed; top:0; left:0; width:100%; height:100%;
-    background-image:
-      linear-gradient(rgba(0,240,255,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,240,255,0.05) 1px, transparent 1px);
-    background-size: 50px 50px;
-    animation: gridMove 20s linear infinite;
-    z-index: -2;
-  }
-  .glow-orb {
-    position: fixed; border-radius:50%; filter: blur(120px); opacity:0.25;
-    z-index: -1; animation: float 8s ease-in-out infinite;
-  }
-  .orb1 { width:400px; height:400px; background:var(--neon); top:-100px; left:-100px; }
-  .orb2 { width:350px; height:350px; background:var(--neon2); bottom:-50px; right:-50px; animation-delay:2s; }
-  .orb3 { width:250px; height:250px; background:var(--neon3); top:40%; left:60%; animation-delay:4s; }
-  @keyframes gridMove { 0%{transform:translate(0,0)} 100%{transform:translate(50px,50px)} }
-  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-30px)} }
+/* Layout concept: cockpit. A sticky glass dock (logo, search, category tabs) over a cosmic field; hero left-aligned with CSS 3D solids drifting at the right; category sections of tilting glass cards; detail modal on click. Single dark look by design (the spec is a neon night-sky UI). */
+:root{
+  --bg:#0a0a0f;
+  --bg-2:#10101c;
+  --fg:#f0f0f5;
+  --muted:#8888aa;
+  --cyan:#00f5ff;
+  --violet:#8b5cf6;
+  --pink:#ff006e;
+  --orange:#ff8c42;
+  --glass:rgba(255,255,255,.05);
+  --glass-2:rgba(255,255,255,.09);
+  --line:rgba(255,255,255,.11);
+  --font-display:"Orbitron",system-ui,sans-serif;
+  --font-body:"Rajdhani",system-ui,sans-serif;
+  --gutter:max(16px,3vw);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:var(--font-body);
+  font-size:18px;
+  line-height:1.45;
+  margin:0;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(60vmax 40vmax at 85% -10%,rgba(139,92,246,.22),transparent 60%),
+    radial-gradient(50vmax 35vmax at -10% 30%,rgba(0,245,255,.12),transparent 60%),
+    radial-gradient(45vmax 30vmax at 70% 110%,rgba(255,0,110,.12),transparent 60%),
+    radial-gradient(rgba(255,255,255,.07) 1px,transparent 1.2px) 0 0/28px 28px;
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.page{position:relative;z-index:1}
+.wrap{max-width:1400px;margin-inline:auto;padding-inline:var(--gutter)}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--cyan)}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;border-radius:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+mark{background:rgba(0,245,255,.22);color:#fff;border-radius:4px;padding:0 2px}
 
-  /* Navbar */
-  nav {
-    position: fixed; top:0; width:100%; z-index:100;
-    display:flex; justify-content:space-between; align-items:center;
-    padding: 1rem 3rem;
-    background: rgba(5,5,16,0.7); backdrop-filter: blur(15px);
-    border-bottom: 1px solid var(--border);
-  }
-  .logo {
-    font-size:1.5rem; font-weight:800; letter-spacing:1px;
-    background: linear-gradient(90deg, var(--neon), var(--neon2), var(--neon3));
-    -webkit-background-clip: text; background-clip:text; color:transparent;
-  }
-  nav ul { display:flex; gap:2rem; list-style:none; }
-  nav a { color:#c0c0d0; text-decoration:none; transition:0.3s; }
-  nav a:hover { color:var(--neon); text-shadow: 0 0 10px var(--neon); }
+/* ---------- Dock ---------- */
+.dock{
+  position:sticky;top:env(safe-area-inset-top,0px);z-index:50;
+  background:rgba(10,10,15,.72);
+  -webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);
+  border-bottom:1px solid var(--line);
+}
+.dock::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),var(--violet),var(--pink),transparent);
+  background-size:200% 100%;animation:slide 7s linear infinite;opacity:.8;
+}
+.nav{display:flex;align-items:center;gap:14px;padding-block:10px}
+.logo{
+  font-family:var(--font-display);font-weight:900;letter-spacing:.14em;font-size:1rem;white-space:nowrap;
+  background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink),var(--cyan));background-size:250% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:slide 6s linear infinite;
+  text-decoration:none;
+}
+.minisearch{position:relative;flex:1;min-width:0;max-width:380px;margin-left:auto}
+.minisearch input{
+  width:100%;min-width:0;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--glass);
+  color:var(--fg);font:inherit;font-size:1rem;padding:0 12px 0 38px;transition:border-color .2s,box-shadow .2s,background .2s;
+}
+.minisearch svg{position:absolute;left:12px;top:50%;translate:0 -50%;width:16px;height:16px;color:var(--muted);pointer-events:none}
+input::placeholder{color:var(--muted)}
+.search-input:focus,.minisearch input:focus{outline:none;border-color:var(--cyan);background:var(--glass-2);box-shadow:0 0 0 3px rgba(0,245,255,.16),0 0 28px rgba(0,245,255,.25)}
+.navbtn{
+  display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:12px;
+  background:var(--glass);border:1px solid var(--line);font-weight:600;font-size:.95rem;white-space:nowrap;
+  transition:border-color .2s,background .2s,box-shadow .2s;
+}
+.navbtn:hover{border-color:rgba(0,245,255,.5);background:var(--glass-2);box-shadow:0 0 18px rgba(0,245,255,.2)}
+.navbtn svg{width:16px;height:16px;flex:none}
+.navbtn[aria-pressed="true"]{border-color:var(--pink);box-shadow:0 0 18px rgba(255,0,110,.3)}
+.navbtn .n{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.85rem}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-block:2px 12px;scrollbar-width:none;overscroll-behavior-x:contain}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-radius:999px;
+  background:var(--glass);border:1px solid var(--line);font-weight:600;font-size:.95rem;opacity:.72;
+  transition:opacity .2s,transform .2s,box-shadow .2s,border-color .2s,background .2s;
+}
+.tab:hover{opacity:1}
+.tab.on{
+  opacity:1;transform:scale(1.05);border-color:var(--c,var(--cyan));
+  background:color-mix(in srgb,var(--c,var(--cyan)) 16%,transparent);
+  box-shadow:0 0 22px color-mix(in srgb,var(--c,var(--cyan)) 45%,transparent);
+}
 
-  /* Hero */
-  .hero {
-    min-height:100vh; display:flex; flex-direction:column;
-    justify-content:center; align-items:center; text-align:center; padding:2rem;
-  }
-  .hero h1 {
-    font-size: clamp(2.5rem, 6vw, 5rem); font-weight:900; line-height:1.1;
-    background: linear-gradient(90deg, var(--neon), var(--neon2), var(--neon3), var(--neon));
-    background-size:300% auto; -webkit-background-clip:text; background-clip:text;
-    color:transparent; animation: shine 6s linear infinite;
-  }
-  @keyframes shine { to { background-position:300% center } }
-  .hero p { font-size:1.3rem; color:#a0a0b8; margin:1.5rem 0 2.5rem; max-width:600px; }
-  .btn {
-    padding: 1rem 2.5rem; border:none; border-radius:50px; cursor:pointer;
-    font-size:1.1rem; font-weight:700; text-decoration:none; display:inline-block;
-    background: linear-gradient(90deg, var(--neon), var(--neon2));
-    color:#000; transition:0.3s;
-    box-shadow: 0 0 20px rgba(0,240,255,0.4);
-  }
-  .btn:hover { transform:scale(1.05); box-shadow: 0 0 40px rgba(0,240,255,0.7); }
-  .btn.ghost {
-    background:transparent; color:var(--neon);
-    border:2px solid var(--neon); box-shadow:none; margin-left:1rem;
-  }
-  .typing { color:var(--neon); border-right:3px solid var(--neon); animation: blink 1s infinite; }
-  @keyframes blink { 50% { border-color:transparent } }
+/* ---------- Hero ---------- */
+.hero{position:relative;padding-block:72px 48px}
+.hero-copy{position:relative;z-index:2;max-width:760px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:.72rem;letter-spacing:.28em;
+  text-transform:uppercase;color:var(--cyan);margin-bottom:18px;
+}
+.eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px var(--cyan);animation:pulse 2s ease-in-out infinite}
+.title{
+  position:relative;display:inline-block;margin:0;font-family:var(--font-display);font-weight:900;
+  font-size:clamp(2rem,7.4vw,5.6rem);line-height:1.02;letter-spacing:.05em;text-wrap:balance;
+  transform:perspective(900px) rotateY(calc(var(--px,0)*7deg)) rotateX(calc(var(--py,0)*-5deg));
+  transition:transform .25s ease-out;transform-style:preserve-3d;
+}
+.title span{
+  position:relative;display:inline-block;
+  background:linear-gradient(100deg,var(--cyan),var(--violet) 45%,var(--pink) 75%,var(--cyan));background-size:250% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:slide 8s linear infinite;
+}
+.title::before,.title::after{
+  content:attr(data-t);position:absolute;left:0;top:0;z-index:-1;color:var(--violet);opacity:.35;pointer-events:none;
+  white-space:pre-wrap;
+}
+.title::before{transform:translate3d(3px,3px,-14px)}
+.title::after{transform:translate3d(7px,7px,-28px);opacity:.18;color:var(--cyan)}
+.tagline{font-size:clamp(1.15rem,2.4vw,1.6rem);color:var(--fg);margin:22px 0 28px;max-width:34ch;font-weight:500;text-wrap:balance}
+.tagline b{color:var(--cyan);font-weight:600}
+.searchbox{position:relative;max-width:620px}
+.search-input{
+  width:100%;min-width:0;height:58px;border-radius:24px;border:1px solid var(--line);background:var(--glass);
+  color:var(--fg);font:inherit;font-size:1.15rem;padding:0 64px 0 56px;transition:border-color .2s,box-shadow .2s,background .2s;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+.searchbox>svg{position:absolute;left:20px;top:50%;translate:0 -50%;width:20px;height:20px;color:var(--cyan);pointer-events:none}
+.kbd{
+  position:absolute;right:18px;top:50%;translate:0 -50%;font-family:var(--font-display);font-size:.72rem;color:var(--muted);
+  border:1px solid var(--line);border-radius:8px;padding:4px 9px;pointer-events:none;
+}
+.stats{display:flex;flex-wrap:wrap;gap:10px 30px;margin-top:30px;font-family:var(--font-display);font-size:.8rem;letter-spacing:.12em;text-transform:uppercase}
+.stats div{display:flex;align-items:baseline;gap:10px;color:var(--muted)}
+.stats strong{font-size:1.5rem;font-weight:700;letter-spacing:.02em;font-variant-numeric:tabular-nums;color:var(--fg);text-shadow:0 0 18px rgba(0,245,255,.55)}
+.shapes{position:absolute;inset:0;pointer-events:none;z-index:1;perspective:900px;overflow:hidden}
+.solid{position:absolute;transform-style:preserve-3d}
+.cube{right:12%;top:70px;width:96px;height:96px;animation:spin 18s linear infinite}
+.cube i{position:absolute;inset:0;border:1.5px solid var(--cyan);background:rgba(0,245,255,.05);box-shadow:inset 0 0 22px rgba(0,245,255,.22),0 0 18px rgba(0,245,255,.15)}
+.cube i:nth-child(1){transform:translateZ(48px)}
+.cube i:nth-child(2){transform:rotateY(180deg) translateZ(48px)}
+.cube i:nth-child(3){transform:rotateY(90deg) translateZ(48px)}
+.cube i:nth-child(4){transform:rotateY(-90deg) translateZ(48px)}
+.cube i:nth-child(5){transform:rotateX(90deg) translateZ(48px)}
+.cube i:nth-child(6){transform:rotateX(-90deg) translateZ(48px)}
+.torus{right:3%;top:210px;width:150px;height:150px;animation:spin2 22s linear infinite}
+.torus i{
+  position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;
+  border:1.5px solid var(--pink);box-shadow:0 0 12px rgba(255,0,110,.35);
+}
+.orb{right:24%;top:250px;width:70px;height:70px;animation:spin 14s linear infinite reverse}
+.orb i{position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--orange);box-shadow:0 0 10px rgba(255,140,66,.3)}
 
-  /* Secciones */
-  section { padding: 6rem 3rem; max-width:1200px; margin:0 auto; }
-  h2 {
-    font-size:2.5rem; text-align:center; margin-bottom:3rem;
-    background: linear-gradient(90deg, var(--neon), var(--neon2));
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
+/* ---------- Filter bar ---------- */
+.filters{
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding-block:18px;scroll-margin-top:140px;
+}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  height:36px;padding:0 14px;border-radius:12px;background:var(--glass);border:1px solid var(--line);
+  font-weight:600;font-size:.95rem;transition:all .2s;
+}
+.chip:hover{border-color:rgba(0,245,255,.5)}
+.chip[aria-pressed="true"]{border-color:var(--cyan);background:rgba(0,245,255,.13);box-shadow:0 0 16px rgba(0,245,255,.3)}
+.status{margin-left:auto;display:flex;align-items:center;gap:12px;color:var(--muted);font-size:.95rem;min-width:0}
+.status output{font-variant-numeric:tabular-nums}
+select{
+  height:36px;border-radius:12px;background:var(--bg-2);color:var(--fg);border:1px solid var(--line);
+  font:inherit;font-size:.95rem;padding:0 10px;
+}
+select:focus{outline:none;border-color:var(--cyan)}
 
-  /* Cursos */
-  .courses-grid {
-    display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.5rem;
-  }
-  .card {
-    background: var(--card); border:1px solid var(--border); border-radius:20px;
-    padding:1.8rem; transition:0.4s; position:relative; overflow:hidden;
-    backdrop-filter: blur(10px);
-  }
-  .card::before {
-    content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
-    background:linear-gradient(90deg,transparent,rgba(0,240,255,0.08),transparent);
-    transition:0.6s;
-  }
-  .card:hover { transform:translateY(-8px); border-color:var(--neon); box-shadow:0 10px 40px rgba(0,240,255,0.15); }
-  .card:hover::before { left:100%; }
-  .card .icon { font-size:2.5rem; margin-bottom:1rem; }
-  .card h3 { color:var(--neon); margin-bottom:0.5rem; font-size:1.2rem; }
-  .card p { color:#9090a8; font-size:0.95rem; line-height:1.5; }
-  .card .level { display:inline-block; margin-top:1rem; padding:0.25rem 0.8rem; border-radius:20px; font-size:0.75rem; font-weight:700; }
-  .level.basico { background:rgba(0,255,150,0.15); color:#00ff96; }
-  .level.intermedio { background:rgba(0,240,255,0.15); color:var(--neon); }
-  .level.avanzado { background:rgba(255,45,149,0.15); color:var(--neon3); }
+/* ---------- Sections & cards ---------- */
+.sec{padding-block:40px 24px;scroll-margin-top:150px;position:relative}
+.sec.flash .sec-head h2::after{animation:glowbar 1.3s ease-out}
+.sec-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 20px;margin-bottom:26px}
+.sec-head h2{
+  position:relative;margin:0;padding-bottom:12px;font-family:var(--font-display);font-weight:700;
+  font-size:clamp(1.15rem,2.6vw,1.7rem);letter-spacing:.06em;text-wrap:balance;
+}
+.sec-head h2::after{
+  content:"";position:absolute;left:0;bottom:0;height:3px;width:min(100%,220px);border-radius:3px;
+  background:linear-gradient(90deg,var(--c),transparent);box-shadow:0 0 16px var(--c);
+}
+.sec-head p{margin:8px 0 0;color:var(--muted);max-width:60ch;font-size:1.02rem}
+.count{font-family:var(--font-display);font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:var(--c);font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:24px;perspective:1300px}
+.cell{position:relative;min-width:0}
+.cell.rise{animation:rise .6s ease-out backwards;animation-delay:var(--d,0ms)}
+.card{
+  --rx:0deg;--ry:0deg;--mx:50%;--my:0%;
+  position:relative;display:flex;flex-direction:column;gap:10px;height:100%;min-height:236px;padding:20px;border-radius:16px;
+  background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.025));
+  border:1px solid var(--line);cursor:pointer;overflow:hidden;contain:layout paint;
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  box-shadow:0 0 0 0 transparent,0 14px 30px -22px color-mix(in srgb,var(--c) 70%,transparent);
+  transform:rotateX(var(--rx)) rotateY(var(--ry)) translateZ(0);
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .3s,border-color .3s;
+}
+.card::before{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;
+  background:radial-gradient(260px circle at var(--mx) var(--my),color-mix(in srgb,var(--c) 28%,transparent),transparent 65%);
+}
+.card:hover,.card:focus-visible{
+  transform:rotateX(var(--rx)) rotateY(var(--ry)) scale(1.02) translateZ(20px);transition-duration:.12s,.3s,.3s;
+  border-color:color-mix(in srgb,var(--c) 70%,transparent);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--c) 40%,transparent),0 24px 60px -18px color-mix(in srgb,var(--c) 65%,transparent),0 0 40px -8px color-mix(in srgb,var(--c) 55%,transparent);
+}
+.card:hover::before,.card:focus-visible::before{opacity:1}
+.card-top{display:flex;align-items:center;justify-content:space-between;transition:transform .3s}
+.card:hover .card-top{transform:translateZ(30px) translateY(-1px)}
+.ico{
+  display:grid;place-items:center;width:64px;height:64px;border-radius:16px;flex:none;
+  font-family:var(--font-display);font-weight:900;font-size:1.35rem;letter-spacing:.02em;color:#06060c;
+  background:linear-gradient(135deg,var(--c),color-mix(in srgb,var(--c) 45%,var(--violet)));
+  box-shadow:0 0 24px -4px var(--c),inset 0 1px 0 rgba(255,255,255,.5);
+}
+.card h3{margin:6px 0 0;font-family:var(--font-display);font-weight:700;font-size:1.08rem;letter-spacing:.04em;overflow-wrap:anywhere}
+.desc{
+  margin:0;color:var(--muted);font-size:1.02rem;line-height:1.35;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{
+  font-size:.76rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:999px;
+  border:1px solid currentColor;background:color-mix(in srgb,currentColor 12%,transparent);white-space:nowrap;
+}
+.t-open-source{color:#39ff88}
+.t-free{color:var(--cyan)}
+.t-freemium{color:#b69cff}
+.t-free-trial{color:var(--orange)}
+.card-foot{margin-top:auto;padding-top:6px}
+.learn{
+  display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 16px;border-radius:12px;font-weight:700;font-size:.95rem;
+  background:linear-gradient(90deg,var(--cyan),var(--violet));background-size:160% 100%;color:#06060c;
+  transition:background-position .4s,box-shadow .3s,transform .2s;
+}
+.card:hover .learn{background-position:100% 0;box-shadow:0 0 22px rgba(0,245,255,.5);transform:scale(1.05)}
+.peek{
+  position:absolute;inset:0;padding:20px;display:flex;flex-direction:column;gap:8px;border-radius:16px;
+  background:linear-gradient(180deg,rgba(10,10,18,.9),rgba(10,10,18,.97));
+  opacity:0;transform:translateY(12px);transition:opacity .25s,transform .25s;pointer-events:none;
+}
+.peek h4{margin:0;font-family:var(--font-display);font-size:.95rem;letter-spacing:.05em;color:var(--c)}
+.peek p{margin:0;font-size:1.02rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.peek span{margin-top:auto;font-weight:700;color:var(--cyan)}
+@media (hover:hover){.card:hover .peek,.card:focus-visible .peek{opacity:1;transform:none}}
+.star{
+  position:absolute;top:18px;right:16px;z-index:3;display:grid;place-items:center;width:36px;height:36px;border-radius:10px;
+  background:rgba(10,10,18,.55);border:1px solid var(--line);color:var(--muted);transition:all .2s;
+}
+.star svg{width:17px;height:17px}
+.star:hover{color:#fff;border-color:var(--pink)}
+.star.on{color:var(--pink);border-color:var(--pink);box-shadow:0 0 14px rgba(255,0,110,.45)}
+.star.on svg{fill:currentColor}
+.more{display:flex;justify-content:center;margin-top:28px}
+.morebtn{
+  height:44px;padding:0 24px;border-radius:12px;background:var(--glass);border:1px solid var(--c);font-weight:700;
+  transition:box-shadow .25s,background .25s,transform .2s;
+}
+.morebtn:hover{background:color-mix(in srgb,var(--c) 14%,transparent);box-shadow:0 0 24px color-mix(in srgb,var(--c) 50%,transparent);transform:scale(1.05)}
 
-  /* Stats */
-  .stats { display:flex; justify-content:space-around; flex-wrap:wrap; gap:2rem; }
-  .stat { text-align:center; }
-  .stat .num { font-size:3rem; font-weight:900; color:var(--neon); text-shadow:0 0 20px var(--neon); }
-  .stat .label { color:#808098; }
+/* ---------- Empty ---------- */
+.empty{display:grid;justify-items:center;text-align:center;gap:10px;padding-block:70px}
+.empty svg{width:132px;height:132px;animation:float 3.4s ease-in-out infinite}
+.empty h3{margin:6px 0 0;font-family:var(--font-display);font-size:1.3rem;letter-spacing:.05em}
+.empty p{margin:0;color:var(--muted);max-width:42ch}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:12px;font-weight:700;
+  border:1px solid var(--line);background:var(--glass);text-decoration:none;color:var(--fg);transition:all .2s;
+}
+.btn:hover{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,245,255,.3);transform:scale(1.04)}
+.btn.primary{border:0;color:#06060c;background:linear-gradient(90deg,var(--cyan),var(--violet));background-size:160% 100%}
+.btn.primary:hover{background-position:100% 0;box-shadow:0 0 26px rgba(0,245,255,.5)}
 
-  footer {
-    text-align:center; padding:3rem; border-top:1px solid var(--border);
-    color:#606078; margin-top:3rem;
-  }
+/* ---------- Modal ---------- */
+.overlay{
+  position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px));
+  background:rgba(4,4,10,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);animation:fade .2s ease-out;
+}
+.modal{
+  --c:var(--cyan);position:relative;width:min(680px,100%);max-height:100%;overflow:auto;border-radius:24px;padding:30px;
+  background:linear-gradient(160deg,#171726,#0e0e19);border:1px solid color-mix(in srgb,var(--c) 55%,transparent);
+  box-shadow:0 0 0 1px rgba(255,255,255,.04),0 30px 80px -20px color-mix(in srgb,var(--c) 60%,transparent);
+  animation:pop .3s cubic-bezier(.2,.9,.3,1.2);
+}
+.mclose{
+  position:absolute;top:16px;right:16px;display:grid;place-items:center;width:40px;height:40px;border-radius:12px;
+  background:var(--glass);border:1px solid var(--line);transition:all .25s;
+}
+.mclose svg{width:18px;height:18px;transition:transform .35s}
+.mclose:hover{border-color:var(--pink);box-shadow:0 0 16px rgba(255,0,110,.4)}
+.mclose:hover svg{transform:rotate(90deg)}
+.mhead{display:flex;align-items:center;gap:18px;padding-right:48px}
+.mhead>div{min-width:0}
+.mhead h2{margin:0;font-family:var(--font-display);font-size:clamp(1.3rem,3.6vw,1.8rem);letter-spacing:.05em;overflow-wrap:anywhere}
+.mcat{margin-top:4px;color:var(--c);font-weight:600;letter-spacing:.04em}
+.modal .tags{margin-top:18px}
+.mlead{margin:18px 0 0;font-size:1.12rem;line-height:1.5}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px;margin-top:22px}
+.mbox{padding:16px 18px;border-radius:16px;background:var(--glass);border:1px solid var(--line);min-width:0}
+.mbox h4{margin:0 0 10px;font-family:var(--font-display);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.mbox ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.mbox li{display:flex;gap:10px;align-items:flex-start}
+.mbox li::before{content:"";flex:none;width:7px;height:7px;margin-top:9px;border-radius:2px;background:var(--c);box-shadow:0 0 8px var(--c);rotate:45deg}
+.mbox p{margin:0}
+.mactions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.mrel{margin-top:26px}
+.mrel h4{margin:0 0 10px;font-family:var(--font-display);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.mrel div{display:flex;flex-wrap:wrap;gap:8px}
+.mrel button{height:34px;padding:0 12px;border-radius:10px;background:var(--glass);border:1px solid var(--line);font-weight:600;transition:all .2s}
+.mrel button:hover{border-color:var(--c);box-shadow:0 0 14px color-mix(in srgb,var(--c) 45%,transparent)}
+
+/* ---------- Footer ---------- */
+footer{position:relative;margin-top:60px;padding-block:44px 52px;text-align:center}
+footer::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink),var(--orange),var(--cyan));background-size:300% 100%;animation:slide 9s linear infinite;
+}
+footer .logo{font-size:1.2rem}
+footer p{margin:12px auto 0;max-width:62ch;color:var(--muted);font-size:1rem}
+footer .built{color:var(--fg);font-weight:600;font-size:1.1rem}
+.toast{
+  position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));translate:-50% 0;z-index:200;
+  padding:10px 18px;border-radius:12px;background:#171726;border:1px solid var(--cyan);box-shadow:0 0 24px rgba(0,245,255,.3);
+  font-weight:600;animation:rise .3s ease-out;
+}
+
+@keyframes slide{to{background-position:-250% 0}}
+@keyframes spin{from{transform:rotateX(-24deg) rotateY(0)}to{transform:rotateX(-24deg) rotateY(360deg)}}
+@keyframes spin2{from{transform:rotateX(62deg) rotateZ(0)}to{transform:rotateX(62deg) rotateZ(360deg)}}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1;scale:1}50%{opacity:.45;scale:.7}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pop{from{opacity:0;transform:translateY(18px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes glowbar{0%{box-shadow:0 0 0 0 var(--c);width:100%}40%{box-shadow:0 0 40px 8px var(--c)}100%{box-shadow:0 0 16px var(--c)}}
+
+@media (max-width:900px){
+  .shapes{opacity:.5}
+  .cube{right:4%;top:40px;width:70px;height:70px}
+  .cube i:nth-child(1){transform:translateZ(35px)}
+  .cube i:nth-child(2){transform:rotateY(180deg) translateZ(35px)}
+  .cube i:nth-child(3){transform:rotateY(90deg) translateZ(35px)}
+  .cube i:nth-child(4){transform:rotateY(-90deg) translateZ(35px)}
+  .cube i:nth-child(5){transform:rotateX(90deg) translateZ(35px)}
+  .cube i:nth-child(6){transform:rotateX(-90deg) translateZ(35px)}
+  .torus,.orb{display:none}
+  .hero{padding-block:48px 32px}
+}
+@media (max-width:640px){
+  .navbtn .lbl{display:none}
+  .navbtn{padding:0 11px}
+  .logo{font-size:.85rem;letter-spacing:.1em}
+  .nav{gap:10px}
+  .status{margin-left:0;width:100%}
+  .kbd{display:none}
+  .modal{padding:22px 18px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+  .title{transform:none}
+}
 </style>
-</head>
-<body>
-<div class="grid-bg"></div>
-<div class="glow-orb orb1"></div>
-<div class="glow-orb orb2"></div>
-<div class="glow-orb orb3"></div>
 
-<nav>
-  <div class="logo">SAADOUNE AI</div>
-  <ul>
-    <li><a href="#cursos">Cursos</a></li>
-    <li><a href="#rutas">Rutas</a></li>
-    <li><a href="#contacto">Contacto</a></li>
-  </ul>
-</nav>
+<canvas id="fx" aria-hidden="true"></canvas>
 
-<header class="hero">
-  <h1>APRENDE MÁS ALLÁ<br>DE LOS LÍMITES</h1>
-  <p>Domina la Inteligencia Artificial del futuro. Cursos en español, prácticos y desde cero. <span class="typing">&nbsp;</span></p>
-  <a href="#cursos" class="btn">🚀 Explorar Cursos</a>
-  <a href="#rutas" class="btn ghost">Ver Rutas de Aprendizaje</a>
-</header>
-
-<section id="stats">
-  <div class="stats">
-    <div class="stat"><div class="num">15+</div><div class="label">Cursos de IA</div></div>
-    <div class="stat"><div class="num">100%</div><div class="label">En Español</div></div>
-    <div class="stat"><div class="num">∞</div><div class="label">Posibilidades</div></div>
+<div class="page">
+  <div class="dock">
+    <div class="wrap">
+      <div class="nav">
+        <a class="logo" href="#top" id="logo">SAADOUNE AI</a>
+        <label class="minisearch">
+          <span class="sr">Search AI tools</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="q2" type="search" placeholder="Search tools" autocomplete="off">
+        </label>
+        <button class="navbtn" id="savedNav" type="button" aria-pressed="false" title="Show saved tools">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>
+          <span class="lbl">Saved</span> <span class="n" id="savedN">0</span>
+        </button>
+        <button class="navbtn" id="surprise" type="button" title="Open a random tool">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+          <span class="lbl">Surprise me</span>
+        </button>
+      </div>
+      <nav class="tabs" id="tabs" aria-label="Categories"></nav>
+    </div>
   </div>
-</section>
 
-<section id="cursos">
-  <h2>⚡ Cursos de Inteligencia Artificial</h2>
-  <div class="courses-grid">
-    <div class="card"><div class="icon">🧠</div><h3>Fundamentos de IA</h3><p>Historia, conceptos y aplicaciones de la inteligencia artificial moderna.</p><span class="level basico">Básico</span></div>
-    <div class="card"><div class="icon">💬</div><h3>Prompt Engineering</h3><p>Domina el arte de comunicarte con ChatGPT, Claude y otros LLMs.</p><span class="level basico">Básico</span></div>
-    <div class="card"><div class="icon">🎨</div><h3>IA Generativa</h3><p>Genera imágenes, música y video con Midjourney, DALL-E y Stable Diffusion.</p><span class="level intermedio">Intermedio</span></div>
-    <div class="card"><div class="icon">🐍</div><h3>Python para IA</h3><p>Programación esencial: NumPy, Pandas y Matplotlib desde cero.</p><span class="level basico">Básico</span></div>
-    <div class="card"><div class="icon">📊</div><h3>Machine Learning</h3><p>Algoritmos de regresión, clasificación y clustering con scikit-learn.</p><span class="level intermedio">Intermedio</span></div>
-    <div class="card"><div class="icon">🧬</div><h3>Deep Learning</h3><p>Redes neuronales profundas con TensorFlow y PyTorch.</p><span class="level avanzado">Avanzado</span></div>
-    <div class="card"><div class="icon">👁️</div><h3>Visión por Computadora</h3><p>Reconocimiento de imágenes, detección de objetos y CNNs.</p><span class="level avanzado">Avanzado</span></div>
-    <div class="card"><div class="icon">🗣️</div><h3>Procesamiento de Lenguaje Natural</h3><p>Transformers, BERT y GPT: cómo las máquinas entienden el lenguaje.</p><span class="level avanzado">Avanzado</span></div>
-    <div class="card"><div class="icon">🤖</div><h3>Agentes de IA</h3><p>Construye agentes autónomos con LangChain y herramientas de IA.</p><span class="level intermedio">Intermedio</span></div>
-    <div class="card"><div class="icon">🔍</div><h3>RAG y Bases de Conocimiento</h3><p>Sistemas de IA que consultan tus propios documentos y datos.</p><span class="level intermedio">Intermedio</span></div>
-    <div class="card"><div class="icon">⚖️</div><h3>Ética en la IA</h3><p>Sesgos, privacidad y uso responsable de la inteligencia artificial.</p><span class="level basico">Básico</span></div>
-    <div class="card"><div class="icon">💼</div><h3>IA para Negocios</h3><p>Automatiza tu empresa: marketing, ventas y productividad con IA.</p><span class="level basico">Básico</span></div>
-    <div class="card"><div class="icon">💻</div><h3>Copilots y Asistentes</h3><p>Integra asistentes de IA en tus apps con APIs de OpenAI y Anthropic.</p><span class="level intermedio">Intermedio</span></div>
-    <div class="card"><div class="icon">🎬</div><h3>Video con IA</h3><p>Creación de video con Runway, Sora y herramientas de generación.</p><span class="level intermedio">Intermedio</span></div>
-    <div class="card"><div class="icon">🚀</div><h3>MLOps</h3><p>Despliega modelos de IA en producción con las mejores prácticas.</p><span class="level avanzado">Avanzado</span></div>
-  </div>
-</section>
+  <header class="hero" id="top">
+    <div class="shapes" aria-hidden="true">
+      <div class="solid cube"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="solid torus" id="torus"></div>
+      <div class="solid orb"><i></i><i style="transform:rotateY(60deg)"></i><i style="transform:rotateY(120deg)"></i></div>
+    </div>
+    <div class="wrap">
+      <div class="hero-copy">
+        <div class="eyebrow"><i></i>Free &amp; open source AI directory</div>
+        <h1 class="title" id="title" data-t="SAADOUNE AI"><span>SAADOUNE</span> <span>AI</span></h1>
+        <p class="tagline">Your gateway to <b>open source</b> and <b>free AI</b>. Find the right tool, try it, save it.</p>
+        <label class="searchbox">
+          <span class="sr">Search AI tools</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input class="search-input" id="q" type="search" placeholder="Search by name, task or tag" autocomplete="off">
+          <span class="kbd" aria-hidden="true">/</span>
+        </label>
+        <div class="stats" id="stats"></div>
+      </div>
+    </div>
+  </header>
 
-<section id="rutas">
-  <h2>🛸 Rutas de Aprendizaje</h2>
-  <div class="courses-grid">
-    <div class="card"><div class="icon">🌱</div><h3>Ruta Principiante</h3><p>Fundamentos de IA → Prompt Engineering → Python para IA → IA para Negocios</p><span class="level basico">4 cursos</span></div>
-    <div class="card"><div class="icon">⚡</div><h3>Ruta Creador</h3><p>IA Generativa → Video con IA → Copilots → Agentes de IA</p><span class="level intermedio">4 cursos</span></div>
-    <div class="card"><div class="icon">🧠</div><h3>Ruta Experto</h3><p>Machine Learning → Deep Learning → NLP → Visión por Computadora → MLOps</p><span class="level avanzado">5 cursos</span></div>
-  </div>
-</section>
+  <main class="wrap" id="explore">
+    <div class="filters" id="filters">
+      <div class="chips" role="group" aria-label="Filter by license">
+        <button class="chip" type="button" data-tag="all" aria-pressed="true">All</button>
+        <button class="chip" type="button" data-tag="open-source" aria-pressed="false">Open Source</button>
+        <button class="chip" type="button" data-tag="free" aria-pressed="false">Free</button>
+        <button class="chip" type="button" data-tag="freemium" aria-pressed="false">Freemium</button>
+        <button class="chip" type="button" data-tag="free-trial" aria-pressed="false">Free Trial</button>
+      </div>
+      <div class="status">
+        <output id="status" aria-live="polite"></output>
+        <label><span class="sr">Sort tools</span>
+          <select id="sort"><option value="default">Curated order</option><option value="az">A to Z</option></select>
+        </label>
+      </div>
+    </div>
+    <div id="app"></div>
+  </main>
 
-<footer id="contacto">
-  <p><strong style="color:var(--neon)">Saadoune AI</strong> — Learn Beyond © 2026</p>
-  <p style="margin-top:0.5rem">El futuro se aprende hoy. 🚀</p>
-</footer>
-</body>
-</html>
+  <footer>
+    <div class="wrap">
+      <a class="logo" href="#top" id="logo2">SAADOUNE AI</a>
+      <p class="built">Built for the AI community.</p>
+      <p>Listings are picked by hand. Plans, limits and licenses change often, so check each tool's own site before you rely on it. Open weights licenses differ from model to model.</p>
+      <p>&copy; 2026 Saadoune AI</p>
+    </div>
+  </footer>
+</div>
+
+<div id="modalRoot"></div>
+
+<script>
+(function(){
+'use strict';
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+var CATS=[
+ {id:'llm',name:'Large Language Models',short:'LLMs',icon:'🤖',color:'#00f5ff',blurb:'Chat assistants and downloadable models for reasoning, writing and code.'},
+ {id:'image',name:'Image Generation',short:'Images',icon:'🎨',color:'#ff006e',blurb:'Turn prompts and sketches into art, product shots and designs.'},
+ {id:'video',name:'Video AI',short:'Video',icon:'🎬',color:'#ff8c42',blurb:'Generate, edit and repurpose video with models and avatars.'},
+ {id:'audio',name:'Audio & Music',short:'Audio',icon:'🎵',color:'#b967ff',blurb:'Make songs, soundtracks and separate stems from any track.'},
+ {id:'code',name:'Code Assistants',short:'Code',icon:'💻',color:'#39ff88',blurb:'Editors, terminals and agents that write and fix code with you.'},
+ {id:'search',name:'Search & Research',short:'Research',icon:'🔍',color:'#4d9dff',blurb:'Answer engines and paper finders that show their sources.'},
+ {id:'writing',name:'Writing & Content',short:'Writing',icon:'📝',color:'#ffd23f',blurb:'Drafting, editing and grammar help for every kind of text.'},
+ {id:'voice',name:'Voice & Speech',short:'Voice',icon:'🗣️',color:'#ff6bd6',blurb:'Text to speech, voice cloning and accurate transcription.'},
+ {id:'gaming',name:'Gaming & Entertainment',short:'Gaming',icon:'🎮',color:'#a3e635',blurb:'Characters, interactive stories and NPCs that talk back.'},
+ {id:'security',name:'Security & Privacy',short:'Privacy',icon:'🛡️',color:'#2dd4bf',blurb:'Run models on your own machine or chat without being tracked.'},
+ {id:'data',name:'Data & Analytics',short:'Data',icon:'📊',color:'#7c8cff',blurb:'Ask questions of your data in plain language and get charts.'},
+ {id:'productivity',name:'Productivity',short:'Productivity',icon:'🧠',color:'#fb7185',blurb:'Meetings, calendars, slides and notes that handle themselves.'}
+];
+var TAGS={'open-source':'Open Source','free':'Free','freemium':'Freemium','free-trial':'Free Trial'};
+
+/* id|name|category|tags|url|short description|full description|features;features;features|pricing */
+var RAW=[
+'chatgpt|ChatGPT|llm|freemium|https://chatgpt.com|OpenAI\'s conversational assistant for writing, analysis and code.|A general-purpose assistant that holds long conversations, reads files and images, and writes code. The free plan covers everyday use with usage limits.|Text and voice chat;File and image analysis;Custom GPTs|Free plan with limits. Paid plans raise limits and add models.',
+'claude|Claude|llm|freemium|https://claude.ai|Anthropic\'s assistant, strong at careful writing, reasoning and long documents.|Claude works through long documents, nuanced analysis and code. It reads files, PDFs and images, and builds documents and small apps right in the chat.|Long context window;Reads PDFs, images and files;Artifacts for apps and documents|Free plan with limits. Paid plans raise limits.',
+'gemini|Gemini|llm|freemium|https://gemini.google.com|Google\'s multimodal assistant, tied into Search and Workspace.|Gemini handles text, images, audio and video, and connects to Gmail, Docs and Drive for people who use Google Workspace.|Multimodal input;Google Workspace links;Deep research mode|Free plan with limits. Paid plans add stronger models.',
+'llama|Llama|llm|open-source|https://www.llama.com|Meta\'s open-weights model family you can download and run yourself.|Llama models come in several sizes, from small ones for laptops to large ones for servers. Weights are free to download under Meta\'s community license, which has some usage terms.|Open weights;Many sizes;Huge fine-tune ecosystem|Free to download. License terms apply, so read them before commercial use.',
+'mistral|Mistral|llm|open-source,freemium|https://mistral.ai|French lab with open-weights models and the Le Chat assistant.|Mistral publishes open-weights models, several under Apache 2.0, and runs Le Chat for people who just want an assistant in the browser.|Open-weights releases;Le Chat assistant;Strong in European languages|Open models are free to download. Le Chat has a free tier.',
+'gemma|Gemma|llm|open-source|https://ai.google.dev/gemma|Google\'s lightweight open models, built to run on laptops and phones.|Gemma models share research with Gemini but are small enough for consumer hardware. They are a good first model to run locally.|Runs on modest hardware;Text and vision variants;Easy to fine-tune|Free to download under Gemma\'s terms of use.',
+'qwen|Qwen|llm|open-source,free|https://qwen.ai|Alibaba\'s open model family with strong multilingual and coding results.|Qwen offers a free chat app and a wide range of open-weights models for text, code, vision and audio, many under permissive licenses.|Free chat app;Many sizes and specialties;Strong multilingual support|Chat is free. Many open weights are Apache 2.0, but check each model.',
+'deepseek|DeepSeek|llm|open-source,free|https://www.deepseek.com|Chinese lab publishing open-weights reasoning and chat models.|DeepSeek released large open-weights models known for step-by-step reasoning, plus a free chat app and a low-cost API.|Open-weights reasoning models;Free chat app;Distilled smaller versions|Chat is free. Weights are free to download, license varies by model.',
+'falcon|Falcon|llm|open-source|https://falconllm.tii.ae|Open models from the Technology Innovation Institute in Abu Dhabi.|The Falcon family is trained and released by TII. Newer releases include compact models designed for efficiency.|Open weights;Efficiency-focused designs;Backed by a public research institute|Free to download under TII\'s license.',
+'olmo|OLMo|llm|open-source|https://allenai.org/olmo|Ai2\'s fully open models, with training data, code and checkpoints released.|OLMo is the pick if you want to study how a model is built. Ai2 publishes the weights, the training data, the code and the intermediate checkpoints.|Fully open training pipeline;Published datasets;Research-friendly|Free. Released under open licenses.',
+
+'sd|Stable Diffusion|image|open-source|https://stability.ai/stable-image|Open-weights image models you can run on your own GPU.|Stable Diffusion models started the open image generation wave. Run them locally, fine-tune them on your own style, or use them through hosted apps.|Runs locally;LoRA and fine-tuning;Huge community of add-ons|Free weights under Stability\'s community license. Larger businesses need a paid license.',
+'flux|FLUX|image|open-source,freemium|https://bfl.ai|Black Forest Labs\' image models, with open-weights versions.|FLUX models are known for sharp detail and good text rendering. Some variants are open weights, and others are available through hosted services.|Open-weights variants;Strong text in images;Image editing models|Some weights are free to download. Commercial use depends on the variant.',
+'comfyui|ComfyUI|image|open-source|https://www.comfy.org|Node-based open-source studio for image and video workflows.|ComfyUI lets you wire models, upscalers and controls into a visual graph and share the whole workflow as a file. It supports many image and video models.|Visual node graphs;Shareable workflows;Works with most open models|Free and open source.',
+'leonardo|Leonardo.ai|image|freemium|https://leonardo.ai|Creative platform for game assets, concept art and product imagery.|Leonardo combines several models with editing tools, upscaling and consistent-character features in a browser app.|Multiple models;Canvas editing;Character consistency|Free tier with limited credits. Paid plans add more.',
+'firefly|Adobe Firefly|image|free-trial,freemium|https://firefly.adobe.com|Adobe\'s generative AI, trained with a focus on licensed content.|Firefly generates images, fills and expands photos, and works inside Photoshop and Illustrator. Adobe positions it as designed for commercial use.|Generative fill and expand;Works inside Adobe apps;Text effects|A limited number of free credits each month. Paid plans add more.',
+'ideogram|Ideogram|image|freemium|https://ideogram.ai|Text-to-image with unusually good typography.|Ideogram is a go-to when you need readable words in posters, logos and social graphics.|Accurate text rendering;Style presets;Prompt remixing|Free tier with limits. Paid plans add private generation.',
+'playground|Playground|image|freemium|https://playground.com|Browser-based design and image creation with a simple editor.|Playground mixes image generation with a design canvas, so you can make a graphic and edit it in the same place.|Design canvas;Templates;Image editing|Free daily allowance. Paid plans raise limits.',
+'krea|Krea|image|freemium|https://www.krea.ai|Real-time image generation and upscaling in the browser.|Krea shows the image changing as you draw or type, and also offers enhancers, upscalers and video tools.|Real-time generation;Upscaling and enhancing;Style training|Free tier with limits. Paid plans add more compute.',
+'designer|Microsoft Designer|image|free|https://designer.microsoft.com|Free image creation and layout from Microsoft, with Image Creator built in.|Designer makes social posts, invitations and images from a prompt. You sign in with a Microsoft account.|Prompt to graphic;Templates;Image Creator|Free with a Microsoft account. Some features need Microsoft 365.',
+
+'runway|Runway|video|free-trial|https://runwayml.com|Video generation and editing tools used by creative teams.|Runway generates clips from text and images, and adds editing tools such as object removal and motion control.|Text and image to video;Editing tools;Motion control|A one-time set of free credits. Paid plans add more.',
+'pika|Pika|video|free-trial|https://pika.art|Short AI video clips with playful effects.|Pika turns prompts and images into short clips and adds effects such as object swaps and scene transformations.|Text and image to video;Creative effects;Scene editing|Limited free credits. Paid plans add more.',
+'luma|Luma Dream Machine|video|freemium|https://lumalabs.ai/dream-machine|Cinematic video generation from text and images.|Dream Machine produces realistic motion and camera moves, and can extend clips and use keyframes.|Keyframes;Camera controls;Clip extension|Free tier with limits. Paid plans add faster, longer generation.',
+'synthesia|Synthesia|video|free-trial|https://www.synthesia.io|Presenter-style videos from a script, with AI avatars.|Synthesia is built for training, onboarding and explainer videos. Type a script, pick an avatar and a language.|AI avatars;Many languages;Templates for training videos|Free demo or limited plan. Paid plans for full use.',
+'heygen|HeyGen|video|freemium|https://www.heygen.com|Avatar videos and video translation with lip-sync.|HeyGen creates talking-avatar videos and can translate an existing video into another language with matching lip movement.|Avatar videos;Video translation;Lip-sync|Free plan with limits. Paid plans add length and quality.',
+'capcut|CapCut|video|freemium|https://www.capcut.com|Popular video editor with captions, effects and AI helpers.|CapCut covers everyday editing for short videos, with auto captions, background removal and templates.|Auto captions;Background removal;Templates|Free with optional paid plan.',
+'opusclip|Opus Clip|video|freemium|https://www.opus.pro|Turns long videos into short, shareable clips.|Opus Clip finds the best moments in a long recording, reframes them for vertical video and adds captions.|Highlight detection;Auto reframing;Captions|Free plan with limits. Paid plans remove limits.',
+'wan|Wan|video|open-source|https://github.com/Wan-Video/Wan2.1|Alibaba\'s open-source video generation models.|Wan models generate video from text or images and run on high-end consumer GPUs. They are widely used inside ComfyUI.|Text and image to video;Open weights;ComfyUI support|Free to download. Check the license on each release.',
+'hunyuan|HunyuanVideo|video|open-source|https://github.com/Tencent/HunyuanVideo|Tencent\'s open video generation model.|HunyuanVideo is a large open-weights text-to-video model with a public codebase and community tools.|Open weights;Public code;Community workflows|Free to download under Tencent\'s license.',
+'ltx|LTX-Video|video|open-source|https://github.com/Lightricks/LTX-Video|Fast open-source video model from Lightricks.|LTX-Video focuses on speed, producing clips quickly on consumer hardware, and is open for local use.|Fast generation;Runs locally;Open code and weights|Free to download. See the license for commercial terms.',
+
+'suno|Suno|audio|freemium|https://suno.com|Make full songs with vocals from a text prompt.|Suno writes lyrics, composes and sings in many genres. Describe the song, or bring your own lyrics.|Songs with vocals;Custom lyrics;Genre and style control|Free daily credits for non-commercial use. Paid plans add commercial rights.',
+'mubert|Mubert|audio|freemium|https://mubert.com|Royalty-free background music generated on demand.|Mubert generates tracks to fit a mood or length, aimed at creators who need safe background music.|Mood-based tracks;Set the length;Creator licensing|Free tier with limits. Paid plans for commercial use.',
+'boomy|Boomy|audio|freemium|https://boomy.com|Make songs in seconds and release them to streaming services.|Boomy lets beginners create instrumentals quickly and edit them before sharing.|Fast song creation;Simple editor;Distribution options|Free to start. Paid plans add more.',
+'audiocraft|MusicGen (AudioCraft)|audio|open-source|https://github.com/facebookresearch/audiocraft|Meta\'s open library for music and sound generation.|AudioCraft includes MusicGen for music and AudioGen for sound effects. The code is open, and model weights have their own license.|Music and sound effects;Python library;Run locally|Free. The released model weights are for non-commercial use.',
+'stableaudio|Stable Audio|audio|freemium,open-source|https://stability.ai/stable-audio|Stability AI\'s music and sound generation, with an open model.|Stable Audio makes tracks and sound effects from text. An open model is available for local experiments.|Text to music;Sound effects;Open model release|Free tier on the web app. Open weights are free under Stability\'s license.',
+'moises|Moises|audio|freemium|https://moises.ai|Separate vocals and instruments, then practice along.|Moises splits a song into stems, detects chords and tempo, and lets musicians slow down or loop sections.|Stem separation;Chord detection;Tempo and pitch control|Free plan with limits. Paid plans add more.',
+'demucs|Demucs|audio|open-source|https://github.com/adefossez/demucs|Open-source model that splits music into stems.|Demucs separates vocals, drums, bass and other instruments from a mixed track. It runs from the command line or inside other apps.|Four to six stem separation;Command line tool;Used inside many apps|Free and open source.',
+
+'copilot|GitHub Copilot|code|freemium|https://github.com/features/copilot|AI pair programmer inside your editor.|Copilot completes code, answers questions in chat and can work through multi-step tasks in popular editors. Verified students and maintainers of popular open-source projects can get free access.|Inline completion;Chat in the editor;Agent mode|Free tier with limits. Paid plans add more. Students can apply for free access.',
+'cursor|Cursor|code|freemium|https://cursor.com|AI-first code editor built on the VS Code foundation.|Cursor understands your whole project, edits across files and runs agents that make larger changes for you to review.|Codebase-aware chat;Multi-file edits;Agent mode|Free Hobby plan with limits. Paid plans add usage.',
+'windsurf|Windsurf|code|freemium|https://windsurf.com|AI editor and agent, formerly known as Codeium.|Windsurf pairs fast completion with an agent that plans and edits across your project.|Agentic editing;Fast completions;Plugins for other IDEs|Free tier with limits. Paid plans add more.',
+'amazonq|Amazon Q Developer|code|freemium|https://aws.amazon.com/q/developer|AWS\'s coding assistant, successor to CodeWhisperer.|Amazon Q Developer suggests code, explains errors and helps with AWS tasks, in the IDE and on the command line.|Code suggestions;AWS-aware answers;Security scanning|Free tier available. Paid tier adds higher limits.',
+'replit|Replit Agent|code|freemium|https://replit.com|Build and deploy apps from a prompt, all in the browser.|Replit gives you an online editor, hosting and an agent that can create an app from a description.|Prompt to app;Instant hosting;Zero setup|Free starter plan with limits. Paid plans add more.',
+'continue|Continue|code|open-source|https://www.continue.dev|Open-source coding assistant for VS Code and JetBrains.|Continue lets you pick your own models, including local ones, so your code stays on your machine.|Bring your own model;Works with local models;VS Code and JetBrains|Free and open source. You pay only for any hosted models you choose.',
+'aider|Aider|code|open-source|https://aider.chat|Pair programming with AI in your terminal.|Aider edits files in your git repo, writes commits for you and works with many models.|Git-aware edits;Works with many models;Terminal workflow|Free and open source. You supply the model access.',
+'cline|Cline|code|open-source|https://cline.bot|Open-source coding agent for your editor.|Cline plans and carries out tasks in VS Code, asking for approval before it changes files or runs commands.|Approval for each step;Bring your own model;Runs commands and edits files|Free and open source. You pay only for model usage.',
+'geminicli|Gemini CLI|code|open-source,free|https://github.com/google-gemini/gemini-cli|Google\'s open-source AI agent for the terminal.|Gemini CLI reads your project, edits files and runs commands from the terminal. It is open source and has a generous free tier when you sign in with a Google account.|Terminal agent;Open source;Free tier with a Google account|Free tier with limits. Higher limits with a paid key.',
+'zed|Zed|code|open-source,freemium|https://zed.dev|Fast open-source editor with built-in AI.|Zed is a high-performance code editor written in Rust with collaborative editing and AI features, including support for your own models.|Very fast editor;Built-in AI chat and edits;Real-time collaboration|Editor is free and open source. AI plans have a free tier.',
+
+'perplexity|Perplexity|search|freemium|https://www.perplexity.ai|Answer engine that cites its sources.|Perplexity searches the web and writes a sourced answer. Follow-up questions keep the context.|Cited answers;Follow-up questions;Research mode|Free plan with limits. Paid plans add more searches.',
+'youcom|You.com|search|freemium|https://you.com|AI search with a choice of models.|You.com combines web results with chat and lets you switch between several models.|Model choice;Web-grounded answers;Research tools|Free tier. Paid plans add more.',
+'elicit|Elicit|search|freemium|https://elicit.com|Research assistant that finds papers and pulls out their findings.|Elicit searches academic papers, summarizes them and extracts details into a table you can compare.|Paper search;Data extraction tables;Summaries|Free tier with limits. Paid plans add more.',
+'consensus|Consensus|search|freemium|https://consensus.app|Search engine for scientific evidence.|Consensus answers yes/no and how-does-it-work questions with findings drawn from published papers.|Evidence-based answers;Paper summaries;Study filters|Free tier with limits. Paid plans add more.',
+'notebooklm|NotebookLM|search|freemium|https://notebooklm.google|Chat with your own sources and get cited answers.|Upload documents, links and videos, then ask questions, make study guides or generate an audio overview.|Answers grounded in your sources;Audio overviews;Study guides|Free to use. Paid plans raise limits.',
+'semanticscholar|Semantic Scholar|search|free|https://www.semanticscholar.org|Free AI-powered search for academic papers.|Semantic Scholar from Ai2 indexes millions of papers and adds AI summaries and citation context.|Paper summaries;Citation context;Research feeds|Free.',
+'khoj|Khoj|search|open-source|https://khoj.dev|Open-source personal AI that searches your notes and the web.|Khoj indexes your documents and notes and answers questions about them. You can self-host it or use the cloud version.|Search your own files;Self-hostable;Works with local or cloud models|Free to self-host. Cloud plans available.',
+'brave|Ask Brave|search|free|https://search.brave.com|AI answers inside a privacy-focused search engine.|Brave Search shows an AI-written summary with sources on top of regular results, without a tracking profile.|Summaries with sources;Private by default;No account needed|Free.',
+
+'jasper|Jasper|writing|free-trial|https://www.jasper.ai|Marketing content platform with brand voice controls.|Jasper helps teams write on-brand copy, campaigns and blog posts with templates and style guides.|Brand voice;Campaign templates;Team workflows|Free trial. Paid plans after.',
+'writesonic|Writesonic|writing|freemium|https://writesonic.com|AI writer for articles, ads and SEO content.|Writesonic drafts long-form articles and short copy, with SEO tools and an AI chat.|Long-form drafts;SEO tools;Templates|Free plan with limits. Paid plans add more.',
+'rytr|Rytr|writing|freemium|https://rytr.me|Budget-friendly writing assistant with many templates.|Rytr offers short-form templates for emails, ads and social posts, with tone choices.|Many use-case templates;Tone control;Built-in editor|Free plan with monthly limits. Paid plans add more.',
+'sudowrite|Sudowrite|writing|free-trial|https://www.sudowrite.com|Writing partner for fiction authors.|Sudowrite helps novelists with brainstorming, drafting and rewriting, and keeps track of story details.|Story planning;Rewrite and expand;Style matching|Free trial. Paid plans after.',
+'grammarly|Grammarly|writing|freemium|https://www.grammarly.com|Grammar, clarity and tone suggestions wherever you type.|Grammarly checks writing in the browser and desktop apps and offers AI help drafting and rewriting.|Grammar and tone checks;Browser extension;AI drafting|Free plan. Paid plans add advanced features.',
+'quillbot|QuillBot|writing|freemium|https://quillbot.com|Paraphrasing, summarizing and grammar tools.|QuillBot rewrites text in different modes, summarizes long passages and checks grammar.|Paraphrasing modes;Summarizer;Grammar checker|Free plan with limits. Paid plans add more.',
+'languagetool|LanguageTool|writing|open-source,freemium|https://languagetool.org|Open-core grammar checker for more than 30 languages.|LanguageTool checks spelling and grammar in many languages and works in browsers, Word and more. The core engine is open source.|Many languages;Browser and Office add-ins;Open-source core|Free tier. Premium adds advanced style suggestions.',
+
+'elevenlabs|ElevenLabs|voice|freemium|https://elevenlabs.io|Highly natural voice synthesis, cloning and dubbing.|ElevenLabs turns text into lifelike speech in many languages, clones voices with consent, and dubs video.|Natural voices;Voice cloning;Dubbing|Free plan with monthly credits. Paid plans add more.',
+'murf|Murf AI|voice|free-trial|https://murf.ai|Voiceover studio for presentations and videos.|Murf lets you pick a voice, adjust pace and emphasis, and sync the voiceover to slides or video.|Studio-style editor;Voice choices;Video sync|Free trial. Paid plans after.',
+'wellsaid|WellSaid|voice|free-trial|https://wellsaid.io|Realistic voices for training and business content.|WellSaid focuses on consistent, professional voiceovers for e-learning and corporate video.|Professional voices;Pronunciation control;Team projects|Free trial. Paid plans after.',
+'whisper|Whisper|voice|open-source|https://github.com/openai/whisper|OpenAI\'s open-source speech recognition model.|Whisper transcribes and translates speech in about 100 languages and runs locally. Many apps use it under the hood.|Transcription and translation;Runs locally;Many languages|Free and open source.',
+'piper|Piper TTS|voice|open-source|https://github.com/rhasspy/piper|Fast, local, open-source text to speech.|Piper runs on small devices like a Raspberry Pi and offers many voices and languages.|Runs offline;Low resource use;Many voices|Free and open source.',
+'coqui|Coqui TTS (XTTS)|voice|open-source|https://github.com/idiap/coqui-ai-TTS|Community-maintained open-source speech toolkit with voice cloning.|The original Coqui company closed, but the toolkit lives on as a community fork with XTTS for multilingual voice cloning.|Voice cloning;Multilingual;Python toolkit|Free and open source. Model licenses vary.',
+'kokoro|Kokoro|voice|open-source|https://github.com/hexgrad/kokoro|Small open-weights text to speech model with natural voices.|Kokoro is a compact model that sounds good and runs on ordinary hardware.|Small and fast;Natural voices;Runs locally|Free. Released under a permissive license.',
+
+'characterai|Character.AI|gaming|freemium|https://character.ai|Chat with characters, public or your own.|Character.AI hosts millions of user-made characters for roleplay and conversation. It has age limits and safety settings.|Create characters;Group chats;Voice calls|Free with optional paid plan.',
+'inworld|Inworld AI|gaming|free-trial|https://inworld.ai|Platform for AI characters and NPCs in games.|Inworld gives developers tools to build talking characters with personalities and memory.|NPC tooling;Voice and personality;Engine integrations|Free trial for developers. Paid usage after.',
+'aidungeon|AI Dungeon|gaming|freemium|https://aidungeon.com|Endless text adventures where you can do anything.|AI Dungeon writes the story as you type your actions, in any genre you choose.|Open-ended stories;Multiplayer;Custom scenarios|Free with limits. Paid plans add better models.',
+'novelai|NovelAI|gaming|free-trial|https://novelai.net|AI storytelling and image generation for writers.|NovelAI offers a writing assistant with lorebooks and a separate anime-style image generator.|Story assistant;Lorebooks;Image generation|Free trial. Subscription for full use.',
+'koboldcpp|KoboldCpp|gaming|open-source|https://github.com/LostRuins/koboldcpp|Run local models for stories and roleplay in one file.|KoboldCpp is a single-file launcher that runs GGUF models locally and offers a story-friendly interface.|Single executable;Story and chat modes;API compatible|Free and open source.',
+'sillytavern|SillyTavern|gaming|open-source|https://github.com/SillyTavern/SillyTavern|Open-source interface for chat with characters and local models.|SillyTavern is a self-hosted front end that connects to many local and cloud model backends.|Character cards;Many backends;Extensible|Free and open source.',
+'convai|Convai|gaming|freemium|https://convai.com|Conversational AI for game characters and virtual worlds.|Convai lets developers add speaking, perceiving characters to Unity, Unreal and web experiences.|Engine plugins;Voice interaction;Character backstories|Free tier for developers. Paid plans add more.',
+
+'ddgchat|DuckDuckGo AI Chat|security|free|https://duckduckgo.com/aichat|Chat with AI models without an account.|DuckDuckGo AI Chat anonymizes your requests and says chats are not used to train models. No sign-in needed for basic use.|No account needed;Anonymized requests;Multiple models|Free. Some models may need a paid plan.',
+'ollama|Ollama|security|open-source|https://ollama.com|Run open models locally with one command.|Ollama downloads and runs models like Llama, Gemma and Qwen on your own computer and exposes a local API.|One-command install;Large model library;Local API|Free and open source.',
+'gpt4all|GPT4All|security|open-source|https://www.nomic.ai/gpt4all|Private local chat app that works offline.|GPT4All is a desktop app that runs models on your CPU or GPU and can chat with your own documents.|Offline chat;Chat with local docs;No account|Free and open source.',
+'privategpt|PrivateGPT|security|open-source|https://github.com/zylon-ai/private-gpt|Ask questions about your documents with nothing leaving your machine.|PrivateGPT is a self-hosted project for question answering over your own files, designed to work offline.|Fully local option;Document Q&A;API included|Free and open source.',
+'lmstudio|LM Studio|security|free|https://lmstudio.ai|Friendly desktop app to find, download and chat with local models.|LM Studio gives you a visual model browser, a chat window and a local server. The app itself is not open source.|Model browser;Local server;Runs offline|Free to use.',
+'jan|Jan|security|open-source|https://jan.ai|Open-source offline ChatGPT alternative.|Jan runs models on your computer and can also connect to cloud models you choose.|Offline use;Open source;Local and cloud models|Free and open source.',
+'openwebui|Open WebUI|security|open-source|https://openwebui.com|Self-hosted chat interface for local and cloud models.|Open WebUI gives you a polished web interface with accounts, document chat and plug-ins, on top of Ollama or other backends.|Self-hosted;Multi-user;Document chat|Free and open source.',
+'llamacpp|llama.cpp|security|open-source|https://github.com/ggml-org/llama.cpp|The engine behind much of the local AI world.|llama.cpp runs quantized models efficiently on everyday hardware and powers many other local tools.|Runs on CPU and GPU;Quantization formats;OpenAI-compatible server|Free and open source.',
+'localai|LocalAI|security|open-source|https://localai.io|Self-hosted drop-in replacement for cloud AI APIs.|LocalAI serves text, image and audio models through an OpenAI-compatible API on your own hardware.|OpenAI-compatible API;Text, image and audio;Self-hosted|Free and open source.',
+
+'julius|Julius AI|data|freemium|https://julius.ai|Chat with your spreadsheets and get charts.|Upload a CSV or Excel file, ask questions in plain language and get analysis, charts and code.|Plain-language analysis;Charts;Shows the code|Free plan with limits. Paid plans add more.',
+'hex|Hex|data|freemium|https://hex.tech|Collaborative notebooks with an AI analyst.|Hex combines SQL, Python and no-code cells with AI that writes queries and builds shareable data apps.|SQL and Python;AI query help;Shareable apps|Free community plan. Paid plans for teams.',
+'jupyterai|Jupyter AI|data|open-source|https://github.com/jupyterlab/jupyter-ai|Open-source AI assistant inside JupyterLab.|Jupyter AI adds a chat panel and magic commands to notebooks and works with many model providers.|Chat in JupyterLab;Notebook magics;Many model providers|Free and open source.',
+'pandasai|PandasAI|data|open-source|https://pandas-ai.com|Ask questions of your dataframes in natural language.|PandasAI is a Python library that turns questions into pandas code and charts.|Natural-language queries;Python library;Generates charts|Free and open source.',
+'vanna|Vanna|data|open-source|https://github.com/vanna-ai/vanna|Open-source text-to-SQL trained on your own schema.|Vanna learns your database schema and past queries so that natural-language questions turn into accurate SQL.|Text to SQL;Learns your schema;Self-hosted|Free and open source.',
+'colab|Google Colab|data|freemium|https://colab.research.google.com|Hosted notebooks with free GPUs and AI help.|Colab runs Python notebooks in the browser, with limited free GPU time and Gemini-powered coding help.|Free GPU access;Zero setup;AI coding help|Free tier with limits. Paid plans add compute.',
+
+'otter|Otter.ai|productivity|freemium|https://otter.ai|Meeting transcription, summaries and action items.|Otter joins your calls, records them and writes a searchable transcript with a summary.|Live transcripts;Meeting summaries;Action items|Free plan with limits. Paid plans add more.',
+'fireflies|Fireflies.ai|productivity|freemium|https://fireflies.ai|Meeting notetaker that searches across all your calls.|Fireflies records and transcribes meetings in many tools and lets you search or ask questions across them.|Records meetings;Searchable archive;CRM integrations|Free plan with limits. Paid plans add more.',
+'gamma|Gamma|productivity|free-trial|https://gamma.app|Presentations, documents and sites from a prompt.|Gamma generates a first draft of a deck or page from a short brief, then lets you edit with simple blocks.|Prompt to deck;Web-style pages;Easy editing|Free credits to try. Paid plans add more.',
+'granola|Granola|productivity|freemium|https://www.granola.ai|Notepad that turns your rough notes into polished meeting notes.|Granola listens on your computer, so no bot joins the call, and expands your jotted notes using the transcript.|No meeting bot;Enhances your notes;Templates|Free for a limited number of meetings. Paid plans add more.',
+'notionai|Notion AI|productivity|free-trial|https://www.notion.com/product/ai|AI writing, search and Q&A inside your Notion workspace.|Notion AI summarizes pages, answers questions across your workspace and drafts text where you already work.|Workspace Q&A;Summaries;Writing help|Free trial. Included with some paid plans.',
+'taskade|Taskade|productivity|freemium|https://www.taskade.com|Tasks, notes and AI agents in one workspace.|Taskade combines project views with AI that builds task lists, drafts content and runs agents for your team.|Project views;AI agents;Real-time collaboration|Free plan with limits. Paid plans add more.',
+'reclaim|Reclaim.ai|productivity|freemium|https://reclaim.ai|Smart calendar that protects time for your tasks and habits.|Reclaim schedules focus time, tasks and habits around your meetings and moves them as your week changes.|Auto-scheduling;Focus time;Calendar sync|Free plan. Paid plans add team features.'
+];
+
+var TOOLS=RAW.map(function(l){
+  var p=l.split('|');
+  return {id:p[0],name:p[1],cat:p[2],tags:p[3].split(','),url:p[4],desc:p[5],full:p[6],features:p[7].split(';'),pricing:p[8]};
+});
+var byId={},catBy={};
+TOOLS.forEach(function(t){byId[t.id]=t});
+CATS.forEach(function(c){catBy[c.id]=c});
+
+function $(s,r){return (r||document).querySelector(s)}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+var saved=new Set();
+try{saved=new Set(JSON.parse(localStorage.getItem('saadoune-ai-saved')||'[]'))}catch(e){}
+function persist(){try{localStorage.setItem('saadoune-ai-saved',JSON.stringify(Array.from(saved)))}catch(e){}}
+
+var LIMIT=8;
+var state={q:'',tag:'all',saved:false,sort:'default',open:{}};
+var app=$('#app');
+
+/* ---------- helpers ---------- */
+function match(t){
+  if(state.tag!=='all'&&t.tags.indexOf(state.tag)<0)return false;
+  if(state.saved&&!saved.has(t.id))return false;
+  if(!state.q)return true;
+  var hay=(t.name+' '+t.desc+' '+t.full+' '+t.features.join(' ')+' '+catBy[t.cat].name+' '+t.tags.map(function(x){return TAGS[x]}).join(' ')).toLowerCase();
+  return state.q.toLowerCase().split(/\s+/).every(function(w){return hay.indexOf(w)>=0});
+}
+function hl(s){
+  if(!state.q)return esc(s);
+  var ws=state.q.trim().split(/\s+/).filter(Boolean).map(function(w){return w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')});
+  if(!ws.length)return esc(s);
+  var re=new RegExp('('+ws.join('|')+')','gi');
+  return s.split(re).map(function(p,i){return i%2?'<mark>'+esc(p)+'</mark>':esc(p)}).join('');
+}
+function mono(t){
+  var w=t.name.replace(/[^A-Za-z0-9 .\-]/g,'').split(/[\s.\-]+/).filter(Boolean);
+  var m=w.length>1?w[0].charAt(0)+w[1].charAt(0):w[0].slice(0,2);
+  return m.toUpperCase();
+}
+function tagsHTML(t){return t.tags.map(function(x){return '<span class="tag t-'+x+'">'+TAGS[x]+'</span>'}).join('')}
+var STAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>';
+
+function cardHTML(t,i){
+  var c=catBy[t.cat],on=saved.has(t.id);
+  return '<div class="cell" style="--d:'+((i%4)*70)+'ms">'+
+    '<article class="card" data-open="'+t.id+'" tabindex="0" role="button" aria-label="'+esc(t.name)+', open details" style="--c:'+c.color+'">'+
+      '<div class="card-top"><span class="ico" aria-hidden="true">'+esc(mono(t))+'</span></div>'+
+      '<h3>'+hl(t.name)+'</h3>'+
+      '<p class="desc">'+hl(t.desc)+'</p>'+
+      '<div class="tags">'+tagsHTML(t)+'</div>'+
+      '<div class="card-foot"><span class="learn">Learn More</span></div>'+
+      '<div class="peek" aria-hidden="true"><h4>'+esc(t.name)+'</h4><p>'+esc(t.full)+'</p><span>Open details &rarr;</span></div>'+
+    '</article>'+
+    '<button class="star'+(on?' on':'')+'" type="button" data-star="'+t.id+'" aria-pressed="'+on+'" aria-label="'+(on?'Remove ':'Save ')+esc(t.name)+(on?' from saved':'')+'">'+STAR+'</button>'+
+  '</div>';
+}
+
+var EMPTY='<div class="empty"><svg viewBox="0 0 120 120" fill="none" aria-hidden="true">'+
+  '<line x1="60" y1="14" x2="60" y2="30" stroke="#00f5ff" stroke-width="3" stroke-linecap="round"/><circle cx="60" cy="12" r="5" fill="#ff006e"/>'+
+  '<rect x="24" y="30" width="72" height="56" rx="16" fill="#171726" stroke="#00f5ff" stroke-width="3"/>'+
+  '<circle cx="45" cy="56" r="8" fill="#00f5ff"/><circle cx="75" cy="56" r="8" fill="#00f5ff"/><circle cx="45" cy="56" r="3" fill="#0a0a0f"/><circle cx="75" cy="56" r="3" fill="#0a0a0f"/>'+
+  '<path d="M46 74q14-8 28 0" stroke="#8b5cf6" stroke-width="3.5" stroke-linecap="round"/>'+
+  '<rect x="34" y="92" width="52" height="14" rx="7" fill="#171726" stroke="#8b5cf6" stroke-width="2.5"/></svg>'+
+  '<h3>No tools found</h3><p>Nothing matches that search. Try a shorter word, another license filter, or clear everything and start over.</p>'+
+  '<button class="btn primary" type="button" data-clear>Clear filters</button></div>';
+
+/* ---------- render ---------- */
+function render(){
+  var active=!!(state.q||state.tag!=='all'||state.saved);
+  var html='',total=0;
+  CATS.forEach(function(c){
+    var list=TOOLS.filter(function(t){return t.cat===c.id&&match(t)});
+    if(!list.length)return;
+    total+=list.length;
+    if(state.sort==='az')list=list.slice().sort(function(a,b){return a.name.localeCompare(b.name)});
+    var all=active||state.open[c.id]||list.length<=LIMIT+1;
+    var vis=all?list:list.slice(0,LIMIT);
+    html+='<section class="sec" id="sec-'+c.id+'" data-cat="'+c.id+'" style="--c:'+c.color+'">'+
+      '<div class="sec-head"><div><h2>'+c.icon+' '+esc(c.name)+'</h2><p>'+esc(c.blurb)+'</p></div>'+
+      '<span class="count">'+list.length+(list.length===1?' tool':' tools')+'</span></div>'+
+      '<div class="grid">'+vis.map(cardHTML).join('')+'</div>'+
+      (all?'':'<div class="more"><button class="morebtn" type="button" data-more="'+c.id+'">Show '+(list.length-vis.length)+' more</button></div>')+
+    '</section>';
+  });
+  app.innerHTML=html||EMPTY;
+  $('#status').textContent=total===TOOLS.length?(TOOLS.length+' tools'):('Showing '+total+' of '+TOOLS.length+' tools');
+  $('#savedN').textContent=saved.size;
+  $('#savedNav').setAttribute('aria-pressed',state.saved);
+  spy(true);
+}
+var io=null;
+function reveal(cells){
+  if(reduce||!('IntersectionObserver' in window))return;
+  io=new IntersectionObserver(function(es){
+    es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('rise');io.unobserve(e.target)}});
+  },{threshold:.05});
+  cells.forEach(function(c){io.observe(c)});
+}
+
+/* ---------- tabs ---------- */
+var tabsEl=$('#tabs');
+tabsEl.innerHTML='<button class="tab on" type="button" data-cat="all">All</button>'+CATS.map(function(c){
+  return '<button class="tab" type="button" data-cat="'+c.id+'" style="--c:'+c.color+'"><span aria-hidden="true">'+c.icon+'</span>'+esc(c.short)+'</button>';
+}).join('');
+var curTab='all';
+function setTab(id){
+  if(id===curTab)return;
+  curTab=id;
+  $$('.tab',tabsEl).forEach(function(b){b.classList.toggle('on',b.dataset.cat===id)});
+  var b=$('.tab[data-cat="'+id+'"]',tabsEl);
+  if(b)tabsEl.scrollTo({left:b.offsetLeft-(tabsEl.clientWidth-b.offsetWidth)/2,behavior:reduce?'auto':'smooth'});
+}
+var spyRaf=0;
+function spy(now){
+  if(spyRaf&&!now)return;
+  var run=function(){
+    spyRaf=0;
+    var cur='all';
+    if(app.getBoundingClientRect().top<220){
+      $$('.sec').forEach(function(s){if(s.getBoundingClientRect().top<=200)cur=s.dataset.cat});
+    }
+    setTab(cur);
+  };
+  if(now){run()}else{spyRaf=requestAnimationFrame(run)}
+}
+addEventListener('scroll',function(){spy(false)},{passive:true});
+
+function clearFilters(){
+  state.q='';state.tag='all';state.saved=false;
+  $('#q').value='';$('#q2').value='';
+  syncChips();
+}
+function syncChips(){$$('.chip').forEach(function(c){c.setAttribute('aria-pressed',c.dataset.tag===state.tag)})}
+function goCat(id){
+  if(id==='all'){
+    $('#filters').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});return;
+  }
+  if(!$('#sec-'+id)){clearFilters();render()}
+  var s=$('#sec-'+id);if(!s)return;
+  s.scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+  s.classList.remove('flash');void s.offsetWidth;s.classList.add('flash');
+  setTimeout(function(){s.classList.remove('flash')},1500);
+}
+
+/* ---------- search / filters ---------- */
+var qs=[$('#q'),$('#q2')];
+qs.forEach(function(el){
+  el.addEventListener('input',function(){
+    state.q=el.value.trim();
+    qs.forEach(function(o){if(o!==el)o.value=el.value});
+    render();
+  });
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='/'&&!/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement||{}).tagName||'')&&!modalOpen){
+    e.preventDefault();
+    var big=$('#q'),r=big.getBoundingClientRect();
+    (r.bottom>0&&r.top<innerHeight?big:$('#q2')).focus();
+  }
+});
+$$('.chip').forEach(function(c){
+  c.addEventListener('click',function(){state.tag=c.dataset.tag;syncChips();render()});
+});
+$('#sort').addEventListener('change',function(e){state.sort=e.target.value;render()});
+$('#savedNav').addEventListener('click',function(){
+  state.saved=!state.saved;render();
+  if(state.saved)$('#filters').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});
+  if(state.saved&&!saved.size)toast('Tap the star on any card to save a tool.');
+});
+$('#surprise').addEventListener('click',function(){
+  var t=TOOLS[Math.floor(Math.random()*TOOLS.length)];
+  openModal(t.id);
+});
+$('#logo').addEventListener('click',function(e){e.preventDefault();scrollTo({top:0,behavior:reduce?'auto':'smooth'})});
+$('#logo2').addEventListener('click',function(e){e.preventDefault();scrollTo({top:0,behavior:reduce?'auto':'smooth'})});
+tabsEl.addEventListener('click',function(e){var b=e.target.closest('.tab');if(b){goCat(b.dataset.cat)}});
+
+/* ---------- toast ---------- */
+var toastT=0;
+function toast(msg){
+  var old=$('.toast');if(old)old.remove();
+  var d=document.createElement('div');d.className='toast';d.setAttribute('role','status');d.textContent=msg;
+  document.body.appendChild(d);clearTimeout(toastT);toastT=setTimeout(function(){d.remove()},2600);
+}
+
+/* ---------- card interactions ---------- */
+function toggleSave(id){
+  var on;
+  if(saved.has(id)){saved.delete(id);on=false}else{saved.add(id);on=true}
+  persist();
+  $('#savedN').textContent=saved.size;
+  $$('[data-star="'+id+'"]').forEach(function(b){
+    b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);
+    b.setAttribute('aria-label',(on?'Remove ':'Save ')+byId[id].name+(on?' from saved':''));
+  });
+  var mb=$('#msave');if(mb&&mb.dataset.id===id){mb.textContent=on?'Saved':'Save for later';mb.setAttribute('aria-pressed',on)}
+  toast(on?byId[id].name+' saved':byId[id].name+' removed');
+  if(state.saved)render();
+}
+app.addEventListener('click',function(e){
+  var st=e.target.closest('[data-star]');
+  if(st){e.stopPropagation();toggleSave(st.dataset.star);return}
+  var mr=e.target.closest('[data-more]');
+  if(mr){
+    var id=mr.dataset.more;state.open[id]=true;render();
+    $$('#sec-'+id+' .cell').slice(LIMIT).forEach(function(c){c.classList.add('rise')});
+    return;
+  }
+  if(e.target.closest('[data-clear]')){clearFilters();render();return}
+  var cd=e.target.closest('.card');
+  if(cd)openModal(cd.dataset.open);
+});
+app.addEventListener('keydown',function(e){
+  if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('card')){
+    e.preventDefault();openModal(e.target.dataset.open);
+  }
+});
+
+/* 3D tilt */
+var tiltEl=null,tx=0,ty=0,traf=0;
+function applyTilt(){
+  traf=0;if(!tiltEl)return;
+  var r=tiltEl.getBoundingClientRect();
+  var x=(tx-r.left)/r.width,y=(ty-r.top)/r.height;
+  tiltEl.style.setProperty('--ry',((x-.5)*12).toFixed(2)+'deg');
+  tiltEl.style.setProperty('--rx',((.5-y)*12).toFixed(2)+'deg');
+  tiltEl.style.setProperty('--mx',(x*100).toFixed(1)+'%');
+  tiltEl.style.setProperty('--my',(y*100).toFixed(1)+'%');
+}
+function resetTilt(){
+  if(!tiltEl)return;
+  tiltEl.style.setProperty('--rx','0deg');tiltEl.style.setProperty('--ry','0deg');tiltEl=null;
+}
+if(!reduce){
+  app.addEventListener('pointermove',function(e){
+    if(e.pointerType==='touch')return;
+    var c=e.target.closest('.card');
+    if(!c){resetTilt();return}
+    if(tiltEl&&tiltEl!==c)resetTilt();
+    tiltEl=c;tx=e.clientX;ty=e.clientY;
+    if(!traf)traf=requestAnimationFrame(applyTilt);
+  });
+  app.addEventListener('pointerleave',resetTilt);
+}
+
+/* ---------- modal ---------- */
+var modalOpen=false,lastFocus=null,root=$('#modalRoot');
+function openModal(id){
+  var t=byId[id];if(!t)return;
+  var c=catBy[t.cat];
+  if(!modalOpen)lastFocus=document.activeElement;
+  var rel=TOOLS.filter(function(x){return x.cat===t.cat&&x.id!==t.id}).slice(0,5);
+  var on=saved.has(t.id);
+  root.innerHTML='<div class="overlay" id="ov"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle" style="--c:'+c.color+'">'+
+    '<button class="mclose" type="button" id="mclose" aria-label="Close details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5 5 19"/></svg></button>'+
+    '<div class="mhead"><span class="ico" style="width:72px;height:72px;font-size:1.5rem" aria-hidden="true">'+esc(mono(t))+'</span><div><h2 id="mtitle">'+esc(t.name)+'</h2><div class="mcat">'+c.icon+' '+esc(c.name)+'</div></div></div>'+
+    '<div class="tags">'+tagsHTML(t)+'</div>'+
+    '<p class="mlead">'+esc(t.full)+'</p>'+
+    '<div class="mgrid"><div class="mbox"><h4>Key features</h4><ul>'+t.features.map(function(f){return '<li>'+esc(f)+'</li>'}).join('')+'</ul></div>'+
+    '<div class="mbox"><h4>Pricing</h4><p>'+esc(t.pricing)+'</p></div></div>'+
+    '<div class="mactions"><a class="btn primary" href="'+esc(t.url)+'" target="_blank" rel="noopener noreferrer">Visit '+esc(t.name)+' &#8599;</a>'+
+    '<button class="btn" type="button" id="msave" data-id="'+t.id+'" aria-pressed="'+on+'">'+(on?'Saved':'Save for later')+'</button></div>'+
+    (rel.length?'<div class="mrel"><h4>More in '+esc(c.short)+'</h4><div>'+rel.map(function(x){return '<button type="button" data-rel="'+x.id+'">'+esc(x.name)+'</button>'}).join('')+'</div></div>':'')+
+  '</div></div>';
+  modalOpen=true;document.body.style.overflow='hidden';
+  $('#mclose').focus();
+}
+function closeModal(){
+  if(!modalOpen)return;
+  root.innerHTML='';modalOpen=false;document.body.style.overflow='';
+  if(lastFocus&&lastFocus.focus)try{lastFocus.focus({preventScroll:true})}catch(e){}
+}
+root.addEventListener('click',function(e){
+  if(e.target.id==='ov'||e.target.closest('#mclose')){closeModal();return}
+  var ms=e.target.closest('#msave');if(ms){toggleSave(ms.dataset.id);return}
+  var r=e.target.closest('[data-rel]');if(r)openModal(r.dataset.rel);
+});
+document.addEventListener('keydown',function(e){
+  if(!modalOpen)return;
+  if(e.key==='Escape'){closeModal();return}
+  if(e.key==='Tab'){
+    var f=$$('a[href],button',root).filter(function(x){return !x.disabled});
+    if(!f.length)return;
+    var first=f[0],last=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+  }
+});
+
+/* ---------- hero ---------- */
+$('#stats').innerHTML=
+  '<div><strong>'+TOOLS.length+'</strong>AI tools</div>'+
+  '<div><strong>'+CATS.length+'</strong>Categories</div>'+
+  '<div><strong>'+TOOLS.filter(function(t){return t.tags.indexOf('open-source')>=0}).length+'</strong>Open source</div>';
+var torus=$('#torus');
+for(var k=0;k<12;k++){
+  var ring=document.createElement('i');
+  ring.style.transform='rotateY('+(k*30)+'deg) translateX(52px)';
+  torus.appendChild(ring);
+}
+var hero=$('.hero'),title=$('#title');
+if(!reduce){
+  hero.addEventListener('pointermove',function(e){
+    var r=hero.getBoundingClientRect();
+    title.style.setProperty('--px',(((e.clientX-r.left)/r.width-.5)).toFixed(3));
+    title.style.setProperty('--py',(((e.clientY-r.top)/r.height-.5)).toFixed(3));
+  });
+  hero.addEventListener('pointerleave',function(){title.style.setProperty('--px',0);title.style.setProperty('--py',0)});
+}
+
+/* ---------- particles ---------- */
+var cv=$('#fx'),cx=cv.getContext('2d'),W=0,H=0,P=[],pr=0;
+function sizeFx(){
+  var d=Math.min(devicePixelRatio||1,2);
+  W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);
+  var n=Math.round(Math.min(70,W*H/22000));
+  P=[];
+  for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.28,vy:(Math.random()-.5)*.28,r:Math.random()*1.4+.5,c:Math.random()<.5?'0,245,255':'139,92,246'});
+}
+function drawFx(){
+  cx.clearRect(0,0,W,H);
+  for(var i=0;i<P.length;i++){
+    var p=P[i];
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    cx.fillStyle='rgba('+p.c+',.75)';
+    cx.beginPath();cx.arc(p.x,p.y,p.r,0,6.283);cx.fill();
+    for(var j=i+1;j<P.length;j++){
+      var q=P[j],dx=p.x-q.x,dy=p.y-q.y,dd=dx*dx+dy*dy;
+      if(dd<12100){
+        cx.strokeStyle='rgba('+p.c+','+(0.16*(1-dd/12100)).toFixed(3)+')';
+        cx.lineWidth=.7;cx.beginPath();cx.moveTo(p.x,p.y);cx.lineTo(q.x,q.y);cx.stroke();
+      }
+    }
+  }
+}
+function loopFx(){
+  if(!document.hidden)drawFx();
+  pr=requestAnimationFrame(loopFx);
+}
+sizeFx();
+if(reduce){drawFx()}else{loopFx()}
+var rz=0;
+addEventListener('resize',function(){clearTimeout(rz);rz=setTimeout(function(){sizeFx();if(reduce)drawFx()},200)});
+
+/* ---------- go ---------- */
+render();
+reveal($$('.cell'));
+})();
+</script>
